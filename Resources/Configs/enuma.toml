@@ -1,0 +1,85 @@
+#
+# enuma (Xiaomi Pad 5 Pro 5G, SM8250-AC) — Mu-Silicium device config.
+#
+# Key set: exactly the official layout of docs/porting/uefi-firmware.md:37-70
+#   [boot_shim] / [uefi_fd] / [boot_image_kernel] / [boot_image]
+# (`[boot_image]` also carries base / kernel_offset / tags_offset / pagesize, which official docs list.)
+#
+# Template choice (task-15): **umi** (reAAAq/uefi-umi, Xiaomi Mi 10, SM8250) — the only SM8250 port the
+# official device table records as reaching UEFI menu + DarwinBoot + UFS root + launchd + persistent Data
+# (docs/devices/index.md:23). cas (ht94911/uefi-cas) is menu-verified but uses header v2 with its own
+# DTB2 arrangement; pipa (xVanTuring/uefi-pipa) is explicitly "not run on hardware".
+# Full three-way comparison and per-value reasoning: ../TEMPLATES.md
+#
+# Every value below either (a) is hardware-verified on another SM8250 device and portable at the SoC
+# level, or (b) carries `# TODO(enuma)` with the method that produces it. Nothing is guessed.
+#
+
+# --- from umi.toml (hardware-proven), key present there -------------------------------
+[status]
+model_count = 1                          # umi.toml:1-2; enuma is a single-model device. Drop if the
+                                         # build driver of your revision does not know [status].
+
+[boot_shim]
+requires_kernel_header = true            # umi.toml:4-5 (and pipa.toml / sheng). The stock ABL of these
+                                         # Xiaomi SM8250 devices checks the ARM64 header at the image start.
+                                         # TODO(enuma): confirm by reading the stock boot image header;
+                                         # if ABL does not check it, this must be false.
+
+# --- the address the firmware volume is loaded at --------------------------------------
+[uefi_fd]
+# CONFIRMED BY ENUMA'S OWN FIRMWARE (task-20). Source: the official fastboot ROM
+# `enuma_images_OS1.0.3.0.TKZCNXM_13.0` -> `xbl.elf` -> UEFIReader drop (build
+# BOOT.XF.3.2-00304-SM8250-2) -> RawFiles/uefiplat.cfg, sha256
+# 29affca455090a26b223ebae2c02bf294547bb699f9b65a891af3c186d99c610, [MemoryMap] row
+#   "UEFI FD", 0x9FC00000, 0x00300000
+# The same pair umi (hardware-proven) and pipa carry -- the prior is now evidence, not a guess.
+# It must stay in sync with MemoryMapLib.c's "UEFI FD" row and with the -DFD_BASE compiled into BootShim;
+# a mismatch is the documented "Firmware volume size mismatch" / "Image starts and resets" failure.
+#
+# Adjacent windows from the same cfg (confirmed; useful when sizing the payload or debugging):
+#   "UEFI Stack"       0x9FF90000 + 0x00040000   (= enuma.dsc PcdCPUCoresStackBase / PrimaryStackSize)
+#   "SEC Heap"         0x9FF00000 + 0x0008C000    "CPU Vectors"    0x9FF8C000 + 0x00001000
+#   "MMU PageTables"   0x9FF8D000 + 0x00003000    "FV Region"      0x9F800000 + 0x00200000
+#   "ABOOT FV"         0x9FA00000 + 0x00200000    "DXE Heap"       0x98900000 + 0x03300000
+#   "Sched Heap"       0x9BC00000 + 0x00400000
+#   "Display Reserved" 0x9C000000 + 0x02400000   (the appended DTB's splash region must sit inside this
+#                                                 window -- the kernel DTS value 0x9c000000+0x2300000 does)
+#   "Kernel"           0xA0000000 + 0x10000000   (reserved for the OS kernel; do not place payload there)
+# [Config] additionally declares MaxMemoryRegions = 74 and UnusableDDRMemoryAtBeginning = 1 with
+# 0x80000000 + 0x600000 -- not table rows; see the MemoryMapLib.c header.
+base = 0x9fc00000
+size = 0x300000                          # 3 MiB = 0x300000 / 0x1000 = 768 blocks (FD_BLOCKS)
+
+[boot_image_kernel]
+kernel_compression = "gzip"              # umi.toml:12-13, pipa.toml, sheng.toml — all three agree
+append_dtb         = true                # ditto; cas sets false because its SoC DTB2 is data-only and ABL
+                                         # applies the stock DTBO (cas.toml:14-15 explains it)
+
+# --- Android boot image ---------------------------------------------------------------
+[boot_image]
+# umi.toml:16-17 -> header_version = 1, and the official umi device page records
+# "Android boot image: Header v1, 4096-byte pages". pipa.toml agrees (v1).
+header_version = 1                       # TODO(enuma): verify against enuma's stock boot image header.
+                                         # Method: adb shell su -c 'dd if=/dev/block/by-name/boot of=
+                                         # /data/local/tmp/boot.img bs=1 count=4096' and read the
+                                         # "ANDROID!" header version field; or boot a menu-only image with
+                                         # v1 and fall back to v2 (cas) only if ABL refuses.
+
+# The four keys below are part of the official key list (docs/porting/uefi-firmware.md:53-58). umi.toml
+# omits them (= Mu-Silicium defaults), pipa's board.toml comment says the defaults are what pipa "has
+# always been packed with", and cas.toml declares them explicitly — with the *same* values. So these are
+# the Mu-Silicium mkbootimg defaults, evidenced three ways:
+base          = 0                        # cas.toml:29 (explicit) — default per pipa/PORTING note
+kernel_offset = 0x8000                   # cas.toml:30 (explicit) — same default in pipa's config
+tags_offset   = 0x1e00000                # cas.toml:33 (explicit) — same default in pipa's config
+pagesize      = 4096                     # cas.toml:28 (explicit) + official umi device page
+                                         # "4096-byte pages"
+# TODO(enuma): cross-check all four against the parameters in enuma's Mu-Silicium device configuration
+# and against `boot.json` after the first `unixnu bootimg` — boot.json records header_version,
+# kernel_address, tags_address and image size, so a mismatch is visible without hardware.
+#
+# cas-only keys kept for reference (do NOT enable unless enuma needs them):
+#   ramdisk_offset = 0x1000000, dtb_offset = 0x1f00000, cmdline = ""
+#   [boot_shim] text_offset/source/validator/linker            (cas has its own BootShim)
+#   [boot_image_dtb] source = "stock-soc-dtb" + sha256 pins    (cas's ABL handles the DTBO itself)

@@ -1,0 +1,17 @@
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = MemoryMapLib
+  # TODO(enuma): newly generated GUID for enumaPkg (pipaPkg uses 375C4FF0-1905-4BA7-A5CA-7D40D25F5EF3).
+  # Not a hardware value: replace only if you want your own identity for the library.
+  FILE_GUID                      = E4A7C1D2-6B58-4F3E-9A21-5D8C0B7E4A19
+  MODULE_TYPE                    = BASE
+  VERSION_STRING                 = 1.0
+  LIBRARY_CLASS                  = MemoryMapLib
+
+[Sources]
+  MemoryMapLib.c
+
+[Packages]
+  ArmPkg/ArmPkg.dec
+  MdePkg/MdePkg.dec
+  SiliciumPkg/SiliciumPkg.dec

@@ -1,0 +1,3 @@
+# pipaPkg ships an empty pipa.dec (0 bytes) in both upstream Mu-Silicium and the UniXNU fork.
+# TODO(enuma): keep this empty unless enumaPkg introduces its own PCDs or GUIDs; if it does, add the
+# [Defines]/[Guids]/[PcdsFixedAtBuild] sections here and list the .dec in enuma.dsc's [Defines] section.

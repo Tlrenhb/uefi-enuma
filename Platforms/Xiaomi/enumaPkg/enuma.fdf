@@ -1,0 +1,138 @@
+##
+#  enumaPkg — flash device / firmware volume description.
+#
+#  Structure: reAAAq/uefi-umi Platforms/Xiaomi/umiPkg/umi.fdf (2,294 B) — FD → FVMAIN_COMPACT →
+#  Sec + SiliciumPkg/Common.fdf.inc, with [FV.FvMain] pulling the three Include/*.inc fragments and the
+#  UniXNU application/driver. pipa.fdf (4,570 B) has the same shape; cas.fdf (1,380 B) drops RAW.inc and
+#  uses its own Sec. Details: ../TEMPLATES.md
+#
+#  Copyright (c) 2018, Linaro Limited. All rights reserved.
+#
+#  SPDX-License-Identifier: BSD-2-Clause-Patent
+##
+
+################################################################################
+# FD Section
+################################################################################
+
+[FD.SILICIUM_UEFI]
+BaseAddress   = $(FD_BASE)|gArmTokenSpaceGuid.PcdFdBaseAddress # The base address of the FLASH Device.
+Size          = $(FD_SIZE)|gArmTokenSpaceGuid.PcdFdSize        # The size in bytes of the FLASH Device
+ErasePolarity = 1
+
+# This one is tricky, it must be: BlockSize * NumBlocks = Size
+BlockSize     = 0x1000
+NumBlocks     = $(FD_BLOCKS)
+
+################################################################################
+# Regions must be defined in ascending order and may not overlap.
+################################################################################
+
+0x00000000|$(FD_SIZE)
+gArmTokenSpaceGuid.PcdFvBaseAddress|gArmTokenSpaceGuid.PcdFvSize
+FV = FVMAIN_COMPACT
+
+################################################################################
+# FV Section
+################################################################################
+
+[FV.FvMain]
+# umi uses a generated FvNameGuid; pipa uses CD8D4C84-20AD-4073-8A28-3400FAE05941.
+# TODO(enuma): newly generated identifier (not a hardware value).
+FvNameGuid         = 7A5E1B93-4C68-42D7-9F30-8E52A1C6B704
+BlockSize          = 0x1000
+NumBlocks          = 0        # This FV gets compressed so make it just big enough
+FvAlignment        = 8        # FV alignment and FV attributes setting.
+ERASE_POLARITY     = 1
+MEMORY_MAPPED      = TRUE
+STICKY_WRITE       = TRUE
+LOCK_CAP           = TRUE
+LOCK_STATUS        = TRUE
+WRITE_DISABLED_CAP = TRUE
+WRITE_ENABLED_CAP  = TRUE
+WRITE_STATUS       = TRUE
+WRITE_LOCK_CAP     = TRUE
+WRITE_LOCK_STATUS  = TRUE
+READ_DISABLED_CAP  = TRUE
+READ_ENABLED_CAP   = TRUE
+READ_STATUS        = TRUE
+READ_LOCK_CAP      = TRUE
+READ_LOCK_STATUS   = TRUE
+
+  # The three device-specific fragments are FILLED (task-20) from the official fastboot ROM's XBL image
+  # (UEFIReader drop, build BOOT.XF.3.2-00304-SM8250-2) -- not from a tablet dump, not from a template:
+  #   APRIORI.inc  the drop's generated APRIORI order, vendor entries prefixed Binaries/enuma/
+  #   DXE.inc      the drop's 90 INF lines (67 QcomPkg/MiPkg + 4 vendor-modified upstream paths prefixed,
+  #                19 Mu/edk2 core modules unprefixed, QcomPkg/XBLCore/XBLCore.inf excluded) + 2 UniXNU lines
+  #   RAW.inc      the drop's 56 FILE FREEFORM blocks, GUIDs verbatim, paths Binaries/enuma/RawFiles/
+  # See each fragment's header for the exact transform and provenance.
+  !include Include/APRIORI.inc
+  !include Include/DXE.inc
+  !include Include/RAW.inc
+
+  # RAM Manager
+  INF SiliciumPkg/Drivers/RamManagerDxe/RamManagerDxe.inf
+
+  # SmBios
+  INF MdeModulePkg/Universal/SmbiosDxe/SmbiosDxe.inf
+  INF SiliciumPkg/Drivers/SmBiosTableDxe/SmBiosTableDxe.inf
+
+  # UniXNU (from uefi-pipa's fork of pipa.fdf; the proven umi.fdf:42-43 carries the same two lines)
+  INF UniXNUPkg/Application/UniXNU/UniXNU.inf
+  INF UniXNUPkg/Driver/UniXNUDxe/UniXNUDxe.inf
+
+  # BDS menu fallback — from umi.fdf:44-45 (hardware-proven). Kept because a firmware with no OS must
+  # still offer a menu; UniXNU's own menu is a separate layer.
+  INF MdeModulePkg/Application/BootManagerMenuApp/BootManagerMenuApp.inf
+  INF PcBdsPkg/MsBootPolicy/MsBootPolicy.inf
+
+  # TODO(enuma): umi.fdf:47-54 also embeds a boot logo and a "no boot OS" bitmap through
+  # FILE FREEFORM = PCD (gOemPkgTokenSpaceGuid.PcdLogoFile) / PCD (gSiliciumPkgTokenSpaceGuid.PcdNoBootOSFile).
+  # Those PCDs must be defined by the platform .dec first, so they are not enabled here. Cosmetic only.
+
+  # ACPI
+  INF MdeModulePkg/Universal/Acpi/AcpiTableDxe/AcpiTableDxe.inf
+  INF MdeModulePkg/Universal/Acpi/AcpiPlatformDxe/AcpiPlatformDxe.inf
+  # TODO(enuma): pipaPkg has `INF RuleOverride = ACPITABLE pipa/AcpiTables.inf` here. Add the enuma
+  # equivalent when the dump provides the tables (see Include/ACPI.inc and enuma.dsc [Components]).
+  # INF RuleOverride = ACPITABLE enuma/AcpiTables.inf
+
+  # Device Tree
+  # TODO(enuma): like pipa, rely on the DTB appended to the boot image
+  # (`unixnu bootimg --dtb <enuma.dtb>`), because append_dtb = true in Resources/Configs/enuma.toml.
+  #INF EmbeddedPkg/Drivers/DtPlatformDxe/DtPlatformDxe.inf
+  #FILE FREEFORM = 25462CDA-221F-47DF-AC1D-259CFAA4E326 {
+  #  SECTION RAW = enumaPkg/FdtBlob/sm8250-xiaomi-enuma.dtb
+  #  SECTION UI = "DeviceTreeBlob"
+  #}
+
+  !include QcomPkg/Extra.fdf.inc
+
+[FV.FVMAIN_COMPACT]
+FvAlignment        = 8
+ERASE_POLARITY     = 1
+MEMORY_MAPPED      = TRUE
+STICKY_WRITE       = TRUE
+LOCK_CAP           = TRUE
+LOCK_STATUS        = TRUE
+WRITE_DISABLED_CAP = TRUE
+WRITE_ENABLED_CAP  = TRUE
+WRITE_STATUS       = TRUE
+WRITE_LOCK_CAP     = TRUE
+WRITE_LOCK_STATUS  = TRUE
+READ_DISABLED_CAP  = TRUE
+READ_ENABLED_CAP   = TRUE
+READ_STATUS        = TRUE
+READ_LOCK_CAP      = TRUE
+READ_LOCK_STATUS   = TRUE
+
+  INF SiliciumPkg/Sec/Sec.inf
+
+  # Upstream file GUID kept (cas changed it to 51ae0a65-2338-47b5-9e10-c72e278e8c09; no reason to).
+  FILE FV_IMAGE = 9E21FD93-9C72-4c15-8C4B-E77F1DB2D792 {
+    SECTION GUIDED EE4E5898-3914-4259-9D6E-DC7BD79403CF PROCESSING_REQUIRED = TRUE {
+      SECTION FV_IMAGE = FVMAIN
+    }
+  }
+
+  !include SiliciumPkg/Common.fdf.inc

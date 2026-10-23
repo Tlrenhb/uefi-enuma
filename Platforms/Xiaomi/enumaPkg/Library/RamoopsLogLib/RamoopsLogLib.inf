@@ -1,0 +1,22 @@
+# VERBATIM COPY from xVanTuring/uefi-pipa branch `pipa` (451 B). The FILE_GUID is an upstream
+# identifier, not a hardware value; keep it or replace it with your own.
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = RamoopsLogLib
+  FILE_GUID                      = 2F6B1D84-7A3C-4E59-B8C1-93D0E4A61F27
+  MODULE_TYPE                    = BASE
+  VERSION_STRING                 = 1.0
+  LIBRARY_CLASS                  = RamLogLib
+
+[Sources]
+  RamoopsLogLib.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  SiliciumPkg/SiliciumPkg.dec
+
+[LibraryClasses]
+  ArmSmcLib
+  BaseLib
+  IoLib
+  TimerLib
