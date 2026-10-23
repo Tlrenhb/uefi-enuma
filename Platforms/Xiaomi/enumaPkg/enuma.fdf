@@ -81,10 +81,13 @@ READ_LOCK_STATUS   = TRUE
   INF UniXNUPkg/Application/UniXNU/UniXNU.inf
   INF UniXNUPkg/Driver/UniXNUDxe/UniXNUDxe.inf
 
-  # BDS menu fallback — from umi.fdf:44-45 (hardware-proven). Kept because a firmware with no OS must
-  # still offer a menu; UniXNU's own menu is a separate layer.
-  INF MdeModulePkg/Application/BootManagerMenuApp/BootManagerMenuApp.inf
-  INF PcBdsPkg/MsBootPolicy/MsBootPolicy.inf
+  # BDS menu fallback: the modules are provided by the included vendor fragment below —
+  #   !include QcomPkg/Extra.fdf.inc -> !include SiliciumPkg/Extra.fdf.inc
+  #   which lists MdeModulePkg/Application/BootManagerMenuApp + PcBdsPkg/MsBootPolicy
+  #   (plus SetupBrowserDxe, BootGraphicsResourceTableDxe and the UFP applications).
+  # Do NOT list them again here: two INF statements for one module put the same FILE_GUID into the FV
+  # twice and GenFv aborts with "the Nth file and Mth file have the same file GUID".
+  # (pipa lists them via Extra; umi does not include Extra and lists them explicitly — we follow pipa.)
 
   # TODO(enuma): umi.fdf:47-54 also embeds a boot logo and a "no boot OS" bitmap through
   # FILE FREEFORM = PCD (gOemPkgTokenSpaceGuid.PcdLogoFile) / PCD (gSiliciumPkgTokenSpaceGuid.PcdNoBootOSFile).
