@@ -98,8 +98,14 @@
   # umi: 1080x2340 (umi.dsc:36-38); pipa: 1800x2880. Take enuma's from the stock DT / vendor display
   # driver, not from either template.
   #
-  gSiliciumPkgTokenSpaceGuid.PcdFrameBufferWidth|0x0
-  gSiliciumPkgTokenSpaceGuid.PcdFrameBufferHeight|0x0
+  # MEASURED (owner probe 2026-10-23: `wm size` -> "Physical size: 1600x2560").
+  # These MUST be non-zero: SimpleFbDxe/SimpleFb.c:107-112 publishes them as the GOP mode and rejects
+  # the mode when Width < 640 or Height < 475, so 0x0 leaves UniXNU's menu with nowhere to draw
+  # (symptom: the tablet boots but the screen stays black). pipa ships 1800x2880 and umi 1080x2340 --
+  # each is its own panel's native resolution, which is also what the panel DTS reports here
+  # (dual CPhY, 1600x2560 per DSI). 1600*2560*4 = 16 MiB, inside the 24 MiB "Display Reserved" window.
+  gSiliciumPkgTokenSpaceGuid.PcdFrameBufferWidth|1600
+  gSiliciumPkgTokenSpaceGuid.PcdFrameBufferHeight|2560
   gSiliciumPkgTokenSpaceGuid.PcdFrameBufferColorDepth|32
 
   #
