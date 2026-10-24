@@ -87,7 +87,14 @@
   INF Binaries/enuma/QcomPkg/Drivers/TLMMDxe/TLMMDxe.inf
   INF Binaries/enuma/QcomPkg/Drivers/FeatureEnablerDxe/FeatureEnablerDxe.inf
   INF Binaries/enuma/QcomPkg/Drivers/VibratorDxe/VibratorDxe.inf
-  INF Binaries/enuma/QcomPkg/Drivers/DisplayDxe/DisplayDxe.inf
+  # DISABLED for bring-up (following umi, the only SM8250 port that displayed a menu on hardware):
+  # the vendor DisplayDxe re-initialises the DSI link and times out on panel completion
+  # (uefi-umi umiPkg/README.md:19-27, polling timeout status 0xD). It sits in APRIORI, so a hang there
+  # stalls the whole DXE dispatch and BDS never runs -- the observed symptom is the early console text
+  # appearing and then nothing. The panel is already lit by ABL and the early console draws into the
+  # inherited "Display Reserved" window, which is exactly what SimpleFbDxe publishes as the GOP
+  # (SimpleFb.c:100-121). Re-enable this line only if a later stage needs the vendor DSI path.
+  #INF Binaries/enuma/QcomPkg/Drivers/DisplayDxe/DisplayDxe.inf
   INF Binaries/enuma/QcomPkg/Drivers/PlatformInfoDxe/PlatformInfoDxe.inf
   INF Binaries/enuma/QcomPkg/Drivers/ButtonsDxe/ButtonsDxe.inf
   INF Binaries/enuma/QcomPkg/Drivers/PmicDxe/PmicDxeLa.inf

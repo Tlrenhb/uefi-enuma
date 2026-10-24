@@ -88,10 +88,10 @@
   # 23043RP34G / M82.
   #
   gSiliciumPkgTokenSpaceGuid.PcdSmbiosSystemManufacturer|"Xiaomi"
-  gSiliciumPkgTokenSpaceGuid.PcdSmbiosSystemModel|"TODO(enuma): retail model name"
+  gSiliciumPkgTokenSpaceGuid.PcdSmbiosSystemModel|"M2105K81C"          # measured: getprop ro.product.model (owner probe 2026-10-23)
   gSiliciumPkgTokenSpaceGuid.PcdSmbiosSystemRetailModel|"enuma"
-  gSiliciumPkgTokenSpaceGuid.PcdSmbiosSystemRetailSku|"TODO(enuma): retail SKU"
-  gSiliciumPkgTokenSpaceGuid.PcdSmbiosSystemBoardModel|"TODO(enuma): board model"
+  gSiliciumPkgTokenSpaceGuid.PcdSmbiosSystemRetailSku|"M2105K81C"        # measured: same build.prop value; refine from /sys/class/dmi/id if Android exposes it
+  gSiliciumPkgTokenSpaceGuid.PcdSmbiosSystemBoardModel|"enuma"           # the board codename used by the bootloader and the device tree
 
   #
   # Simple Frame Buffer — TODO(enuma): enuma is an 11" tablet (Xiaomi Pad 5 Pro family), not a phone.

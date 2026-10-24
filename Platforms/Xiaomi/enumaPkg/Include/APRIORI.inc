@@ -78,7 +78,9 @@ APRIORI DXE {
     INF Binaries/enuma/QcomPkg/Drivers/TLMMDxe/TLMMDxe.inf
     INF Binaries/enuma/QcomPkg/Drivers/FeatureEnablerDxe/FeatureEnablerDxe.inf
     INF Binaries/enuma/QcomPkg/Drivers/VibratorDxe/VibratorDxe.inf
-    INF Binaries/enuma/QcomPkg/Drivers/DisplayDxe/DisplayDxe.inf
+    # vendor DisplayDxe disabled for bring-up: see the note in DXE.inc (DSI completion timeout,
+    # and because it is APRIORI a hang here stops every later driver from being dispatched).
+    #INF Binaries/enuma/QcomPkg/Drivers/DisplayDxe/DisplayDxe.inf
     INF Binaries/enuma/QcomPkg/Drivers/PlatformInfoDxe/PlatformInfoDxe.inf
     INF Binaries/enuma/QcomPkg/Drivers/ButtonsDxe/ButtonsDxe.inf
     INF Binaries/enuma/QcomPkg/Drivers/PmicDxe/PmicDxeLa.inf
