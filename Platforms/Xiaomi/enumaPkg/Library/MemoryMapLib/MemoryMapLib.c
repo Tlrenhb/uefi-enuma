@@ -46,10 +46,10 @@ gMemoryDescriptor[] = {
   {"PIL Reserved",       0x86000000,    0xd200000, AddMem, MEM_RES, UNCACHEABLE, Reserv, UNCACHED_UNBUFFERED_XN},
   {"DXE Heap",           0x98900000,    0x3300000, AddMem, SYS_MEM, SYS_MEM_CAP, Conv, WRITE_BACK_XN},
   {"Sched Heap",         0x9bc00000,     0x400000, AddMem, SYS_MEM, SYS_MEM_CAP, BsData, WRITE_BACK_XN},
-  {"Display Reserved",   0x9c000000,    0x2400000, AddMem, MEM_RES, SYS_MEM_CAP, Reserv, UNCACHED_UNBUFFERED_XN},  // bring-up: UNCACHED, not WRITE_THROUGH. The early console draws into this window, and once
-  // ArmConfigureMmu turns the MMU and caches on, write-through writes can sit in the CPU cache
-  // while the panel scanout reads DRAM - indistinguishable from a hang. Helper.S:47-55 records
-  // the same coherency trap. Revert to WRITE_THROUGH_XN once the console is proven stable.
+  {"Display Reserved",   0x9c000000,    0x2400000, AddMem, MEM_RES, SYS_MEM_CAP, Reserv, WRITE_THROUGH_XN},  // umi's hardware-proven table uses WRITE_THROUGH_XN for its display window.
+  // An earlier revision mapped this UNCACHED (Device memory): the early console's writes are not
+  // guaranteed aligned, device memory forbids unaligned access, and the vector table is installed only
+  // after the MMU is on - so the alignment fault became a silent hang.
   {"DBI Dump",           0x9e400000,     0xf00000, NoHob, MMAP_IO, INITIALIZED, Conv, UNCACHED_UNBUFFERED_XN},
   {"FV Region",          0x9f800000,     0x200000, AddMem, SYS_MEM, SYS_MEM_CAP, BsData, WRITE_BACK_XN},
   {"ABOOT FV",           0x9fa00000,     0x200000, AddMem, SYS_MEM, SYS_MEM_CAP, Reserv, WRITE_BACK_XN},
