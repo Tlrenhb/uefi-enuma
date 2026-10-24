@@ -37,7 +37,9 @@
   INF MdeModulePkg/Universal/Console/ConSplitterDxe/ConSplitterDxe.inf
   INF MdeModulePkg/Universal/Console/GraphicsConsoleDxe/GraphicsConsoleDxe.inf
   INF MdeModulePkg/Universal/HiiDatabaseDxe/HiiDatabaseDxe.inf
-  INF MdeModulePkg/Universal/SetupBrowserDxe/SetupBrowserDxe.inf
+  # SetupBrowserDxe is NOT listed here: SiliciumPkg/Extra.fdf.inc (pulled in through
+  # QcomPkg/Extra.fdf.inc) already adds it. Two INF statements for one module put the same FILE_GUID
+  # into FvMain twice and GenFv aborts ("the Nth file and Mth file have the same file GUID").
   INF ArmPkg/Drivers/ArmGicDxe/ArmGicDxe.inf
   INF ArmPkg/Drivers/TimerDxe/TimerDxe.inf
   INF MdeModulePkg/Universal/BdsDxe/BdsDxe.inf
@@ -53,4 +55,6 @@
   # --- UniXNU: the payload block device, the XNU loader, the boot manager registrar (umi.fdf:42-43) ---
   INF shengPkg/Drivers/ShengBootMemoryDxe/ShengBootMemoryDxe.inf
   INF DarwinBootPkg/Driver/DarwinBoot.inf
-  INF UniXNUPkg/Driver/UniXNUDxe/UniXNUDxe.inf
+  # UniXNUDxe is NOT listed here either: enuma.fdf already has it next to the UniXNU application
+  # (umi.fdf:42-43 does the same). Listing it twice is the duplicate-GUID failure above.
+
