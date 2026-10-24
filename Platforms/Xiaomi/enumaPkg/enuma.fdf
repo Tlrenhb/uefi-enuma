@@ -71,7 +71,10 @@ READ_LOCK_STATUS   = TRUE
   !include Include/RAW.inc
 
   # RAM Manager
-  INF SiliciumPkg/Drivers/RamManagerDxe/RamManagerDxe.inf
+  # DISABLED for bring-up: pipa's MemoryMapLib.c records that once RamManagerDxe runs it fills every gap
+  # of the RAM partitions, allocations land in those gaps, "and the boot stopped silently after
+  # GraphicsConsoleDxe". Re-enable together with a memory map that describes every gap.
+  #INF SiliciumPkg/Drivers/RamManagerDxe/RamManagerDxe.inf
 
   # SmBios
   INF MdeModulePkg/Universal/SmbiosDxe/SmbiosDxe.inf
