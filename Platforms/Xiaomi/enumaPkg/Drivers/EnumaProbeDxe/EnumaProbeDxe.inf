@@ -1,0 +1,25 @@
+## @file
+#  Bring-up probe: shows that DXE dispatch and the DXE event loop are alive on the panel.
+#
+#  SPDX-License-Identifier: BSD-2-Clause-Patent
+##
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = EnumaProbeDxe
+  FILE_GUID                      = 39901E66-C7C9-44B6-A10E-415F6C956CA5
+  MODULE_TYPE                    = DXE_DRIVER
+  VERSION_STRING                 = 0.1
+  ENTRY_POINT                    = EnumaProbeDxeEntry
+
+[Sources]
+  EnumaProbeDxe.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+
+[LibraryClasses]
+  UefiDriverEntryPoint
+  UefiBootServicesTableLib
+
+[Depex]
+  TRUE

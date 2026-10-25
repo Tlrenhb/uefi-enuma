@@ -83,6 +83,8 @@ READ_LOCK_STATUS   = TRUE
   # UniXNU (from uefi-pipa's fork of pipa.fdf; the proven umi.fdf:42-43 carries the same two lines)
   INF UniXNUPkg/Application/UniXNU/UniXNU.inf
   INF UniXNUPkg/Driver/UniXNUDxe/UniXNUDxe.inf
+  INF UniXNUPkg/Driver/UniXNURamDiskDxe/UniXNURamDiskDxe.inf
+  INF enumaPkg/Drivers/EnumaProbeDxe/EnumaProbeDxe.inf
 
   # BDS menu fallback: the modules are provided by the included vendor fragment below —
   #   !include QcomPkg/Extra.fdf.inc -> !include SiliciumPkg/Extra.fdf.inc

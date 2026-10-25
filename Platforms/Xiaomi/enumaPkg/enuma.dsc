@@ -164,6 +164,8 @@
   #
   UniXNULib|UniXNUPkg/Library/UniXNULib/UniXNULib.inf
   FdtLib|MdePkg/Library/BaseFdtLib/BaseFdtLib.inf
+  # Required by the shared UniXNURamDiskDxe (docs/porting/uefi-firmware.md, 'Required integration').
+  HobLib|MdePkg/Library/DxeHobLib/DxeHobLib.inf
 
   #
   # TODO(enuma): umi also provides SecureBootHandlerLib via its own
@@ -181,6 +183,12 @@
   UniXNUPkg/Application/UniXNU/UniXNU.inf
   UniXNUPkg/Driver/UniXNUDxe/UniXNUDxe.inf
   shengPkg/Drivers/ShengBootMemoryDxe/ShengBootMemoryDxe.inf
+  # Documented as required (docs/porting/uefi-firmware.md): publishes the Mu-Silicium FDT
+  # initrd as a read-only block device. sheng's DXE.inc carries this next to ShengBootMemoryDxe,
+  # i.e. the two are not alternatives.
+  UniXNUPkg/Driver/UniXNURamDiskDxe/UniXNURamDiskDxe.inf
+  # Our own bring-up probe: DXE dispatch + event-loop heartbeat on the panel.
+  enumaPkg/Drivers/EnumaProbeDxe/EnumaProbeDxe.inf
   DarwinBootPkg/Driver/DarwinBoot.inf
 
   #
