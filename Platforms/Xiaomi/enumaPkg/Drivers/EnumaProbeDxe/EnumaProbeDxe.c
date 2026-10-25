@@ -77,7 +77,7 @@ EnumaProbeDxeEntry (
                  )
           ))
     {
-      if (!EFI_ERROR (gBS->SetTimer (mHeartbeat, TimerPeriodic, EFI_TIMER_PERIOD_MILLISECONDS (500)))) {
+      if (!EFI_ERROR (gBS->SetTimer (mHeartbeat, TimerPeriodic, 5000000u)   // 500 ms in 100 ns units)) {
         EnumaPaint (112, 0x0000FFFFu);
       }
     }
