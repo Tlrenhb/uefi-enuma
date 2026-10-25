@@ -20,7 +20,6 @@
 
 #define ENUMA_FB_BASE     0x9C000000u
 #define ENUMA_FB_WIDTH    1600u
-#define ENUMA_BAND_LINES  6u
 
 STATIC EFI_EVENT  mHeartbeat;
 STATIC UINT32     mTick;
@@ -28,7 +27,8 @@ STATIC UINT32     mTick;
 STATIC
 VOID
 EnumaPaint (
-  IN UINTN   Row,
+  IN UINTN   FirstRow,
+  IN UINTN   Lines,
   IN UINT32  Color
   )
 {
@@ -36,8 +36,8 @@ EnumaPaint (
   UINTN             Index;
 
   Fb = (volatile UINT32 *)(UINTN)ENUMA_FB_BASE;
-  for (Index = 0; Index < (ENUMA_FB_WIDTH * ENUMA_BAND_LINES); Index++) {
-    Fb[(Row * ENUMA_FB_WIDTH) + Index] = Color;
+  for (Index = 0; Index < (ENUMA_FB_WIDTH * Lines); Index++) {
+    Fb[(FirstRow * ENUMA_FB_WIDTH) + Index] = Color;
   }
 }
 
@@ -50,8 +50,10 @@ EnumaHeartbeat (
   )
 {
   mTick++;
+  // A 120-scanline block that alternates colour twice a second: unmistakable from a photo.
   EnumaPaint (
-    120 + ((mTick % 8) * (ENUMA_BAND_LINES + 2)),
+    500,
+    120,
     ((mTick & 1) != 0) ? 0x0000FF00u : 0x00FF00FFu
     );
 }
@@ -63,7 +65,7 @@ EnumaProbeDxeEntry (
   IN EFI_SYSTEM_TABLE  *SystemTable
   )
 {
-  EnumaPaint (104, 0x0000FFFFu);
+  EnumaPaint (300, 120, 0x00FF0000u);   // big block: DXE dispatch reached this driver
 
   mTick = 0;
   if (gBS != NULL) {
@@ -79,7 +81,7 @@ EnumaProbeDxeEntry (
     {
       // 5,000,000 * 100 ns = 500 ms
       if (!EFI_ERROR (gBS->SetTimer (mHeartbeat, TimerPeriodic, 5000000u))) {
-        EnumaPaint (112, 0x0000FFFFu);
+        EnumaPaint (440, 40, 0x000000FFu);
       }
     }
   }
