@@ -50,9 +50,13 @@ EnumaHeartbeat (
   )
 {
   mTick++;
-  // A 120-scanline block that alternates colour twice a second: unmistakable from a photo.
+
+  // Everything is repainted on every tick: once DXE brings up the GOP and GraphicsConsoleDxe the
+  // console clears the panel, so a block painted only once would be wiped. The heartbeat block walks
+  // down the screen and alternates colour twice a second, which is unmistakable in a photo.
+  EnumaPaint (300, 120, 0x00FF0000u);
   EnumaPaint (
-    500,
+    500 + ((mTick % 6) * 10),
     120,
     ((mTick & 1) != 0) ? 0x0000FF00u : 0x00FF00FFu
     );
