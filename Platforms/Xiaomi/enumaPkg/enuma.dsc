@@ -123,6 +123,14 @@
   gEfiMdeModulePkgTokenSpaceGuid.PcdCapsuleInRamSupport|FALSE
   gUniXNUPkgTokenSpaceGuid.PcdUniXNUDebugLevel|0x80000000
 
+  #
+  # Bring-up: an ASSERT must PRINT and CONTINUE, never dead-loop. With the default 0x0F a failed
+  # ASSERT_EFI_ERROR stops the boot silently (and with RamoopsLogLib's PON setup the following
+  # power-cycle turns it into a warm reset that comes straight back to fastboot, so the screen -
+  # the only channel this board has - never gets read). 0x0E keeps the message, drops the break.
+  #
+  gEfiMdePkgTokenSpaceGuid.PcdDebugPropertyMask|0x0E
+
 [PcdsFeatureFlag]
   # umi.dsc:47-49 — the missing Capsule Arch is what stopped umi's DXE before BDS in an early attempt.
   gEfiMdeModulePkgTokenSpaceGuid.PcdSupportUpdateCapsuleReset|FALSE
