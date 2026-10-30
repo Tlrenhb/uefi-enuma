@@ -8,6 +8,44 @@
 > 第三参考：[xVanTuring/uefi-pipa](https://github.com/xVanTuring/uefi-pipa)（平板 6，**从未上机**；仅用于 SM8250-AC 的 `SOC_TYPE = 2` 与结构对照）。
 > 三模板逐项对照与每个选择的理由：**[TEMPLATES.md](TEMPLATES.md)**。
 
+> **当前状态（2026-10-31）：enumaPkg 已在实机上把 UniXNU 菜单跑起来了。**
+> 设备全程只用 `fastboot boot` 热启动，不写任何分区。当前屏幕上：wordmark、4 个条目、选中高亮、
+> 倒计时与状态行全部正常；剩 `Connect ConIn Failed`（没有输入设备）、`no boot entry found`（没有 payload）、
+> `drivers 0 / kits 0 / acpi 0`（UniXNU 侧注入链未启动）三件事。
+> 设备侧仓库与上机记录：[Tlrenhb/UniXNU-enuma](https://github.com/Tlrenhb/UniXNU-enuma)。
+
+## 0. 让它跑起来的两条平台级修正（2026-10-30）
+
+### 0.1 `Library/MemoryMapLib/MemoryMapLib.c` —— 补上 ramoops 窗口
+
+```
+{"Ramoops", 0xb0000000, 0x400000, AddMem, SYS_MEM, SYS_MEM_CAP, Reserv, WRITE_BACK_XN},
+```
+
+原因：`SiliciumPkg/Library/FrameBufferSerialPortLib` 的 `SerialPortWrite()` 第一句就是
+`RamLogWrite (Buffer, NumberOfBytes)`，而 `RamoopsLogLib` 写的是 `RAMOOPS_CONSOLE_BASE = 0xB0000000`。
+原表最后一行 `{"Kernel", 0xa0000000, 0x10000000}` **正好结束在 0xB0000000**，于是 ramoops 基址一个字节
+都没被映射；`ArmEnableMmu()` 一开，第一次写控制台就 data abort，固件永远停在 `MU:09 enabling mmu`。
+
+> 别和 `{"AOSS", 0xb000000, 0x4000000}` 搞混：那是 **0x0B000000**（7 位），AOSS 寄存器块，不是 ramoops。
+
+### 0.2 `enuma.dsc` —— ASSERT 只打印，不死循环
+
+```
+gEfiMdePkgTokenSpaceGuid.PcdDebugPropertyMask|0x0E
+```
+
+默认 `0x0F` 下 `ASSERT_EFI_ERROR` 失败会 `CpuDeadLoop()`，屏幕上一个字都不增，且随后的电源键复位会被
+`RamoopsLogLib` 的 PON 设置变成温重启直接回 fastboot。`0x0E` 保留打印、去掉死循环。
+
+### 0.3 控制台库的额外加固（由构建流水线注入，不改本仓库）
+
+`FrameBufferSerialPortLib.c` 在流水线里被补三处：控制台写路径不再依赖 `RamLogWrite`；显存区
+（`LocateMemoryRegionByName ("Display Reserved")`）与几何（`LoadGeometry` 里的 hand-off）只在第一次调用时解析并缓存；
+光标从 `FbBase + FbLength - 8`（区尾部）移进库静态。这样控制台在任何 MMU 配置下都不会因为摸到区尾部而踩空。
+
+---
+
 **当前状态：只差 enuma 自己的 dump 产物即可构建。** 结构、库签名、UniXNU 集成、NV/capsule 策略、SoC 选择都已按
 **真机验证过的 umi 配置**落地；仍缺的只有"只能从 enuma 固件里取"的东西（见 §3），并且两个设备相关的 `.c` 表仍带
 **故意 `#error`** —— 不填就不出固件，这是刻意的。
