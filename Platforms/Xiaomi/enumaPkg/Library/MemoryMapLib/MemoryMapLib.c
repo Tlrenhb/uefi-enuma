@@ -61,6 +61,13 @@ gMemoryDescriptor[] = {
   {"Log Buffer",         0x9fff7000,       0x8000, AddMem, SYS_MEM, SYS_MEM_CAP, RtData, WRITE_BACK_XN},
   {"Info Blk",           0x9ffff000,       0x1000, AddMem, SYS_MEM, SYS_MEM_CAP, RtData, WRITE_BACK_XN},
   {"Kernel",             0xa0000000,   0x10000000, AddMem, SYS_MEM, SYS_MEM_CAP, Reserv, WRITE_BACK_XN},
+  // Ramoops: the stock kernel reserves 4 MiB (2 MiB console + 2 MiB pmsg) at 0xB0000000 and
+  // RamoopsLogLib writes the firmware log straight into it. WITHOUT this row the first console
+  // write after ArmEnableMmu () faults: the "Kernel" row above ends at exactly 0xB0000000, so the
+  // ramoops base is one byte past the last mapped page. Hardware-proven on 2026-10-30 - the write
+  // stopped between the entry marker and the next one, and nulling SerialPortLib let the same code
+  // run all the way into DxeCore.
+  {"Ramoops",            0xb0000000,    0x400000, AddMem, SYS_MEM, SYS_MEM_CAP, Reserv, WRITE_BACK_XN},
 
   // ---- Other / Register ----
   {"IMEM Base",          0x14680000,      0x40000, NoHob, MMAP_IO, INITIALIZED, Conv, NS_DEVICE},
