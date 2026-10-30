@@ -1,6 +1,6 @@
-# uefi-enuma-skeleton — enumaPkg（Mu-Silicium 平台包）骨架
+# uefi-enuma — enumaPkg（小米平板 5 Pro 5G 的 Mu-Silicium 平台包）
 
-> 任务：task-13 起，**task-15 换模板重写**。作者：teammate `docs-claims`。日期：2026-10-23（Asia/Shanghai）。
+> <sub>历史：task-13 起，task-15 换模板重写；作者 teammate `docs-claims`，2026-10-23。下面 §1 起是该阶段的正文，仍然有效。</sub>
 > 目标设备：小米平板 5 Pro 5G（**enuma**，SM8250-AC / 骁龙 870，Kona）。
 > **主模板**：[reAAAq/uefi-umi](https://github.com/reAAAq/uefi-umi)（小米 10，SM8250）—— 官方设备表里唯一记录到
 > "UEFI 菜单 + payload 卷 + DarwinBoot + UFS 根卷 + launchd + 持久 Data" 的 SM8250 端口（`docs/devices/index.md:23`）。
