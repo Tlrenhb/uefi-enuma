@@ -69,6 +69,19 @@ gMemoryDescriptor[] = {
   // run all the way into DxeCore.
   {"Ramoops",            0xb0000000,    0x400000, AddMem, SYS_MEM, SYS_MEM_CAP, Reserv, WRITE_BACK_XN},
 
+  // Darwin RAM / Darwin High RAM: the conventional regions the proven SM8250 port (uefi-umi) declares
+  // and this table was missing. Without them the ONLY EfiConventionalMemory row above is the 51 MiB
+  // "DXE Heap", and DarwinBoot's ReadFile () does AllocatePool (file size) for the whole kernel: on
+  // 2026-10-31 the menu answered the XNU entry with
+  //   'enuma first boot: source 4K XNU to the panic screen' returned: Out of Resources
+  // because kernel.macho is 51,838,976 B, i.e. larger than every free pool.
+  // High RAM ends at the measured top of System RAM: 0x280000000 - 0x100000000 = 0x180000000, from
+  // /proc/iomem on this 8 GiB tablet (board.toml [payload] dram_size = 0x200000000 over the 0x80000000
+  // DRAM base). uefi-umi uses the same 0x100000000 base and stops at 9 GiB on a 12 GiB device, so the
+  // 4-8 GiB range here is a subset of what the same SoC has already proven to be RAM.
+  {"Darwin RAM",         0xc0000000,    0x20000000, AddMem, SYS_MEM, SYS_MEM_CAP, Conv, WRITE_BACK_XN},
+  {"Darwin High RAM",    0x100000000ULL, 0x180000000ULL, AddMem, SYS_MEM, SYS_MEM_CAP, Conv, WRITE_BACK_XN},
+
   // ---- Other / Register ----
   {"IMEM Base",          0x14680000,      0x40000, NoHob, MMAP_IO, INITIALIZED, Conv, NS_DEVICE},
   {"IMEM Cookie Base",   0x146bf000,       0x1000, AddDev, MMAP_IO, INITIALIZED, Conv, NS_DEVICE},
