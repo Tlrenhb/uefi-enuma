@@ -197,6 +197,14 @@
   UniXNUPkg/Driver/UniXNURamDiskDxe/UniXNURamDiskDxe.inf
   # Our own bring-up probe: DXE dispatch + event-loop heartbeat on the panel.
   enumaPkg/Drivers/EnumaProbeDxe/EnumaProbeDxe.inf
+
+  #
+  # Bring-up payload: a trivial EFI application. It is NOT put into the firmware volume - the
+  # workflow copies the built .efi onto the boot volume (EFI/BOOT/BOOTAA64.EFI) so UniXNU's fallback
+  # loader has something real to list and start. That proves the whole chain (FAT volume ->
+  # SimpleFileSystem -> config/fallback loader -> LoadImage) without needing the Apple kernel yet.
+  #
+  MdeModulePkg/Application/HelloWorld/HelloWorld.inf
   DarwinBootPkg/Driver/DarwinBoot.inf
 
   #
