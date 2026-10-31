@@ -197,6 +197,12 @@
   UniXNUPkg/Driver/UniXNURamDiskDxe/UniXNURamDiskDxe.inf
   # Our own bring-up probe: DXE dispatch + event-loop heartbeat on the panel.
   enumaPkg/Drivers/EnumaProbeDxe/EnumaProbeDxe.inf
+  #
+  # ConIn: the menu is useless without an input device ("[Bds] Connect ConIn Failed"). The PM8150
+  # PON and the SPMI PMIC arbiter are the same IP as on umi (SM8250), so umi's buttons driver ports
+  # almost verbatim; it turns volume-up/down and a short power release into arrow keys and Enter.
+  #
+  enumaPkg/Drivers/EnumaButtonsDxe/EnumaButtonsDxe.inf
 
   #
   # Bring-up payload: a trivial EFI application. It is NOT put into the firmware volume - the
@@ -205,15 +211,6 @@
   # SimpleFileSystem -> config/fallback loader -> LoadImage) without needing the Apple kernel yet.
   #
   MdeModulePkg/Application/HelloWorld/HelloWorld.inf
-
-  #
-  # PartitionDxe: the payload volume is an MBR disk with one FAT partition. DiskIoDxe publishes the
-  # whole-disk DiskIo, but only PartitionDxe produces the child handle for the partition, and Fat
-  # refuses a whole disk that starts with an MBR instead of a BPB. Without this the firmware reports
-  # "Unable to locate any 964E5B22-... handles" (EFI_SIMPLE_FILE_SYSTEM_PROTOCOL) and UniXNU falls
-  # back to its built-in configuration.
-  #
-  MdeModulePkg/Universal/Disk/PartitionDxe/PartitionDxe.inf
   DarwinBootPkg/Driver/DarwinBoot.inf
 
   #
