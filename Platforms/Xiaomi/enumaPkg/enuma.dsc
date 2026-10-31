@@ -205,6 +205,15 @@
   # SimpleFileSystem -> config/fallback loader -> LoadImage) without needing the Apple kernel yet.
   #
   MdeModulePkg/Application/HelloWorld/HelloWorld.inf
+
+  #
+  # PartitionDxe: the payload volume is an MBR disk with one FAT partition. DiskIoDxe publishes the
+  # whole-disk DiskIo, but only PartitionDxe produces the child handle for the partition, and Fat
+  # refuses a whole disk that starts with an MBR instead of a BPB. Without this the firmware reports
+  # "Unable to locate any 964E5B22-... handles" (EFI_SIMPLE_FILE_SYSTEM_PROTOCOL) and UniXNU falls
+  # back to its built-in configuration.
+  #
+  MdeModulePkg/Universal/Disk/PartitionDxe/PartitionDxe.inf
   DarwinBootPkg/Driver/DarwinBoot.inf
 
   #
