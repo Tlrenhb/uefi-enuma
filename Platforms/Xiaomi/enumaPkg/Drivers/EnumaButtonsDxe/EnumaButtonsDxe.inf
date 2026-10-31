@@ -1,0 +1,38 @@
+## @file
+# Volume keys (PM8150 PON) and power key as an EFI_SIMPLE_TEXT_INPUT_PROTOCOL, so the UniXNU
+# menu becomes operable. Ported from reAAAq/uefi-umi Platforms/Xiaomi/umiPkg/Drivers/UmiButtonsDxe
+# (BSD-2-Clause-Patent); the SPMI PMIC arbiter and the PM8150 PON are the same IP on SM8250.
+# SPDX-License-Identifier: BSD-2-Clause-Patent
+##
+[Defines]
+  INF_VERSION    = 0x00010005
+  BASE_NAME      = EnumaButtonsDxe
+  FILE_GUID      = 6F1D2A54-9C3E-4B07-8E15-2A7C4D91B3F0
+  MODULE_TYPE    = DXE_DRIVER
+  VERSION_STRING = 0.1
+  ENTRY_POINT    = EnumaButtonsEntry
+
+[Sources]
+  EnumaButtons.c
+  EnumaKeyFilter.h
+
+[Packages]
+  MdePkg/MdePkg.dec
+  SiliciumPkg/SiliciumPkg.dec
+
+[LibraryClasses]
+  UefiDriverEntryPoint
+  UefiBootServicesTableLib
+  DebugLib
+  IoLib
+  TimerLib
+
+[Protocols]
+  gEfiSimpleTextInProtocolGuid
+  gEfiDevicePathProtocolGuid
+
+[Guids]
+  gEfiEventExitBootServicesGuid
+
+[Depex]
+  TRUE
