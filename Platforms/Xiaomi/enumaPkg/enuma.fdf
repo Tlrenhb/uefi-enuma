@@ -85,6 +85,7 @@ READ_LOCK_STATUS   = TRUE
   INF UniXNUPkg/Driver/UniXNUDxe/UniXNUDxe.inf
   INF UniXNUPkg/Driver/UniXNURamDiskDxe/UniXNURamDiskDxe.inf
   INF enumaPkg/Drivers/EnumaProbeDxe/EnumaProbeDxe.inf
+  INF MdeModulePkg/Universal/Disk/PartitionDxe/PartitionDxe.inf
 
   # BDS menu fallback: the modules are provided by the included vendor fragment below —
   #   !include QcomPkg/Extra.fdf.inc -> !include SiliciumPkg/Extra.fdf.inc
