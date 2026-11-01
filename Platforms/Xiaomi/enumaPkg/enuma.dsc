@@ -203,6 +203,11 @@
   # almost verbatim; it turns volume-up/down and a short power release into arrow keys and Enter.
   #
   enumaPkg/Drivers/EnumaButtonsDxe/EnumaButtonsDxe.inf
+  #
+  # Watchdog: arm the APSS watchdog so a hung boot resets on its own instead of needing a
+  # fifteen-second power hold before the next attempt. Never petted, by design.
+  #
+  enumaPkg/Drivers/EnumaWatchdogDxe/EnumaWatchdogDxe.inf
 
   #
   # Bring-up payload: a trivial EFI application. It is NOT put into the firmware volume - the

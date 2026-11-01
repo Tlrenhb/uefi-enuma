@@ -1,0 +1,26 @@
+## @file
+#  APSS watchdog for bring-up: a hung boot resets instead of waiting for a human.
+#
+#  SPDX-License-Identifier: BSD-2-Clause-Patent
+##
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = EnumaWatchdogDxe
+  FILE_GUID                      = 7f3c1a86-52d4-4f19-9c2b-6d1e0a5b7c34
+  MODULE_TYPE                    = DXE_DRIVER
+  VERSION_STRING                 = 1.0
+  ENTRY_POINT                    = EnumaWatchdogEntry
+
+[Sources]
+  EnumaWatchdog.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+
+[LibraryClasses]
+  UefiDriverEntryPoint
+  DebugLib
+  IoLib
+  UefiBootServicesTableLib
+  UefiLib

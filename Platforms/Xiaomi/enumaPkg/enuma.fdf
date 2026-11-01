@@ -86,6 +86,7 @@ READ_LOCK_STATUS   = TRUE
   INF UniXNUPkg/Driver/UniXNURamDiskDxe/UniXNURamDiskDxe.inf
   INF enumaPkg/Drivers/EnumaProbeDxe/EnumaProbeDxe.inf
   INF enumaPkg/Drivers/EnumaButtonsDxe/EnumaButtonsDxe.inf
+  INF enumaPkg/Drivers/EnumaWatchdogDxe/EnumaWatchdogDxe.inf
   # MBR child handle for the payload volume; without it there is no SimpleFileSystem at all.
   INF MdeModulePkg/Universal/Disk/PartitionDxe/PartitionDxe.inf
 
