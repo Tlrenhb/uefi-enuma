@@ -24,3 +24,6 @@
   IoLib
   UefiBootServicesTableLib
   UefiLib
+
+[Depex]
+  TRUE
