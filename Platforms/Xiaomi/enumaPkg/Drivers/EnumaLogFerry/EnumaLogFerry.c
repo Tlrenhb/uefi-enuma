@@ -62,7 +62,7 @@ FerryToVolume (
   // The payload volume is the one fastboot booted; it only exists in RAM, so a file written there is
   // lost with the reset that follows. Skip it and keep looking for the on-disk FAT12 logfs partition.
   //
-  Status = Root->Open (Root, &Probe, L"\EFI\UniXNU\unixnu.toml", EFI_FILE_MODE_READ, 0);
+  Status = Root->Open (Root, &Probe, L"\\EFI\\UniXNU\\unixnu.toml", EFI_FILE_MODE_READ, 0);
   if (!EFI_ERROR (Status)) {
     Probe->Close (Probe);
     Root->Close (Root);
@@ -123,7 +123,9 @@ OnReadyToBoot (
   for (Index = 0; Index < Count; Index++) {
     if (!EFI_ERROR (FerryToVolume (Handles[Index], Data, Length))) {
       *(volatile UINT32 *)Carrier = 0;          /* consumed: never replay an old capture */
-      gST->ConOut->OutputString (gST->ConOut, L"ENUMA-FERRY: wrote \\enuma.txt to the first writable FAT volume\r\n");
+      if (gST->ConOut != NULL) {
+        gST->ConOut->OutputString (gST->ConOut, L"ENUMA-FERRY: wrote \\enuma.txt to the first writable FAT volume\r\n");
+      }
       break;
     }
   }
