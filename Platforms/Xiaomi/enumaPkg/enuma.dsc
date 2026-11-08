@@ -208,6 +208,8 @@
   # fifteen-second power hold before the next attempt. Never petted, by design.
   #
   enumaPkg/Drivers/EnumaWatchdogDxe/EnumaWatchdogDxe.inf
+  # Ferries a block of kernel RAM to \enuma.txt on logfs: XNU can write memory, nothing else can read it.
+  enumaPkg/Drivers/EnumaLogFerry/EnumaLogFerryDxe.inf
 
   #
   # Bring-up payload: a trivial EFI application. It is NOT put into the firmware volume - the

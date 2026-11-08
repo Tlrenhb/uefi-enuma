@@ -1,0 +1,37 @@
+## @file
+#  Carry a block of kernel RAM out to \enuma.txt on the logfs partition.
+#
+#  XNU can write physical memory but nothing on this board can read it back (no /dev/mem, no kcore,
+#  no pstore, no UART), so the firmware ferries it to a file an adb shell can pull. See the comment
+#  block in EnumaLogFerry.c for the carrier layout at 0xB0400000.
+#
+#  SPDX-License-Identifier: BSD-2-Clause-Patent
+##
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = EnumaLogFerryDxe
+  FILE_GUID                      = 6C2B1E4A-9D37-4F81-9C5B-2E7A1D8F3B04
+  MODULE_TYPE                    = DXE_DRIVER
+  VERSION_STRING                 = 0.1
+  ENTRY_POINT                    = EnumaLogFerryDxeEntry
+
+[Sources]
+  EnumaLogFerry.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+
+[LibraryClasses]
+  UefiDriverEntryPoint
+  UefiBootServicesTableLib
+
+[Protocols]
+  gEfiSimpleFileSystemProtocolGuid
+  gEfiPartitionInfoProtocolGuid
+
+[Guids]
+  gEfiEventReadyToBootGuid
+
+[Depex]
+  TRUE
