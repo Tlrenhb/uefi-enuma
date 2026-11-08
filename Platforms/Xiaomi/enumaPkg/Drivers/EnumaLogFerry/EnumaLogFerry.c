@@ -26,7 +26,6 @@
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiDriverEntryPoint.h>
 #include <Protocol/SimpleFileSystem.h>
-#include <Protocol/PartitionInfo.h>
 #include <Guid/EventGroup.h>
 
 #define ENUMA_LOG_PA      0xB0400000u
@@ -35,48 +34,6 @@
 #define ENUMA_LOG_FILE    L"\\enuma.txt"
 
 STATIC EFI_EVENT  mReadyToBoot;
-
-STATIC
-BOOLEAN
-NameIs (
-  IN CONST CHAR16  *Name,
-  IN CONST CHAR16  *Wanted
-  )
-{
-  UINTN  Index;
-
-  for (Index = 0; Wanted[Index] != 0; Index++) {
-    if (Name[Index] != Wanted[Index]) {
-      return FALSE;
-    }
-  }
-  return Name[Index] == 0;
-}
-
-STATIC
-EFI_STATUS
-VolumeName (
-  IN  EFI_HANDLE  Handle,
-  OUT CHAR16      *Buffer,
-  IN  UINTN       BufferChars
-  )
-{
-  EFI_PARTITION_INFO_PROTOCOL  *Info;
-  EFI_STATUS                    Status;
-  UINTN                        Index;
-
-  Status = gBS->HandleProtocol (Handle, &gEfiPartitionInfoProtocolGuid, (VOID **)&Info);
-  if (EFI_ERROR (Status) || (Info == NULL) || (Info->Type != PARTITION_TYPE_GPT) ||
-      (Info->PartitionEntry == NULL)) {
-    return EFI_NOT_FOUND;
-  }
-
-  for (Index = 0; (Index + 1 < BufferChars) && (Info->PartitionEntry->PartitionName[Index] != 0); Index++) {
-    Buffer[Index] = Info->PartitionEntry->PartitionName[Index];
-  }
-  Buffer[Index] = 0;
-  return EFI_SUCCESS;
-}
 
 STATIC
 EFI_STATUS
@@ -89,6 +46,7 @@ FerryToVolume (
   EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *Fs;
   EFI_FILE_PROTOCOL                *Root;
   EFI_FILE_PROTOCOL                *File;
+  EFI_FILE_PROTOCOL                *Probe;
   EFI_STATUS                        Status;
   UINTN                             Size;
 
@@ -99,6 +57,16 @@ FerryToVolume (
   Status = Fs->OpenVolume (Fs, &Root);
   if (EFI_ERROR (Status)) {
     return Status;
+  }
+  //
+  // The payload volume is the one fastboot booted; it only exists in RAM, so a file written there is
+  // lost with the reset that follows. Skip it and keep looking for the on-disk FAT12 logfs partition.
+  //
+  Status = Root->Open (Root, &Probe, L"\EFI\UniXNU\unixnu.toml", EFI_FILE_MODE_READ, 0);
+  if (!EFI_ERROR (Status)) {
+    Probe->Close (Probe);
+    Root->Close (Root);
+    return EFI_NOT_FOUND;
   }
   Status = Root->Open (Root, &File, ENUMA_LOG_FILE,
                        EFI_FILE_MODE_CREATE | EFI_FILE_MODE_WRITE | EFI_FILE_MODE_READ, 0);
@@ -130,7 +98,6 @@ OnReadyToBoot (
   EFI_HANDLE      *Handles;
   UINTN            Count;
   UINTN            Index;
-  CHAR16           Name[40];
   EFI_STATUS       Status;
 
   (VOID)Event;
@@ -154,13 +121,9 @@ OnReadyToBoot (
 
   Data   = (UINT8 *)(UINTN)(Carrier + 8);
   for (Index = 0; Index < Count; Index++) {
-    if ((VolumeName (Handles[Index], Name, ARRAY_SIZE (Name)) != EFI_SUCCESS) ||
-        !NameIs (Name, L"logfs")) {
-      continue;
-    }
     if (!EFI_ERROR (FerryToVolume (Handles[Index], Data, Length))) {
       *(volatile UINT32 *)Carrier = 0;          /* consumed: never replay an old capture */
-      gST->ConOut->OutputString (gST->ConOut, L"ENUMA-FERRY: wrote \\enuma.txt to logfs\r\n");
+      gST->ConOut->OutputString (gST->ConOut, L"ENUMA-FERRY: wrote \\enuma.txt to the first writable FAT volume\r\n");
       break;
     }
   }

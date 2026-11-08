@@ -28,7 +28,6 @@
 
 [Protocols]
   gEfiSimpleFileSystemProtocolGuid
-  gEfiPartitionInfoProtocolGuid
 
 [Guids]
   gEfiEventReadyToBootGuid
